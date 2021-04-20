@@ -40,7 +40,26 @@
 			</section>
 			<section id="log" class="container">
 				<h2>Battle Log</h2>
-				<ul></ul>
+				<ul>
+					<li v-for="(logMessage, index) in logMessages" :key="index">
+						<span
+							:class="{
+								'log--player': logMessage.actionBy === 'player',
+								'log--monster': logMessage.actionBy === 'monster'
+							}"
+						>
+							{{ logMessage.actionBy === 'player' ? 'Player' : 'Monster' }}
+						</span>
+						<span v-if="logMessage.actionType === 'heal'">
+							heals himself for
+							<span class="log--heal">{{ logMessage.actionValue }}</span>
+						</span>
+						<span v-else>
+							attacks and deals
+							<span class="log--damage">{{ logMessage.actionValue }}</span>
+						</span>
+					</li>
+				</ul>
 			</section>
 		</div>
 	</div>
@@ -65,7 +84,8 @@ export default {
 		playerHealth: 100,
 		monsterHealth: 100,
 		currentRound: 0,
-		winner: null
+		winner: null,
+		logMessages: []
 	}),
 	computed: {
 		canUseSpecialAttackMonster() {
@@ -114,10 +134,14 @@ export default {
 
 			this.monsterHealth -= attackValue;
 
+			this.addLogMessage('player', 'attack', attackValue);
+
 			this.attackPlayer();
 		},
 		attackPlayer() {
 			const attackValue = getRandomValue(8, 15);
+
+			this.addLogMessage('monster', 'attack', attackValue);
 
 			this.playerHealth -= attackValue;
 		},
@@ -127,6 +151,8 @@ export default {
 			const attackValue = getRandomValue(10, 25);
 
 			this.monsterHealth -= attackValue;
+
+			this.addLogMessage('player', 'attack', attackValue);
 
 			this.attackPlayer();
 		},
@@ -141,6 +167,8 @@ export default {
 				this.playerHealth += healValue;
 			}
 
+			this.addLogMessage('player', 'heal', healValue);
+
 			this.attackPlayer();
 		},
 		surrender() {
@@ -151,6 +179,13 @@ export default {
 			this.currentRound = 0;
 			this.playerHealth = 100;
 			this.monsterHealth = 100;
+		},
+		addLogMessage(actionBy, actionType, actionValue) {
+			this.logMessages.unshift({
+				actionBy,
+				actionType,
+				actionValue
+			});
 		}
 	}
 };
