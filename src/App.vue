@@ -25,8 +25,9 @@
 				<h3 v-if="winner === 'player'">You won!</h3>
 				<h3 v-if="winner === 'monster'">You lost!</h3>
 				<h3 v-if="winner === 'draw'">It's a draw!</h3>
+				<button @click="startNewGame">Start new game</button>
 			</section>
-			<section id="controls">
+			<section v-else id="controls">
 				<button @click="attackMonster">ATTACK</button>
 				<button
 					:disabled="canUseSpecialAttackMonster"
@@ -35,7 +36,7 @@
 					SPECIAL ATTACK
 				</button>
 				<button @click="healPlayer">HEAL</button>
-				<button>SURRENDER</button>
+				<button @click="surrender">SURRENDER</button>
 			</section>
 			<section id="log" class="container">
 				<h2>Battle Log</h2>
@@ -71,14 +72,18 @@ export default {
 			return this.currentRound % 3 !== 0;
 		},
 		monsterBarStyles() {
-			return {
-				width: this.monsterHealth + '%'
-			};
+			if (this.monsterHealth < 0) {
+				return { width: '0%' };
+			}
+
+			return { width: this.monsterHealth + '%' };
 		},
 		playerBarStyles() {
-			return {
-				width: this.playerHealth + '%'
-			};
+			if (this.playerHealth < 0) {
+				return { width: '0%' };
+			}
+
+			return { width: this.playerHealth + '%' };
 		}
 	},
 	watch: {
@@ -137,6 +142,15 @@ export default {
 			}
 
 			this.attackPlayer();
+		},
+		surrender() {
+			this.winner = 'monster';
+		},
+		startNewGame() {
+			this.winner = null;
+			this.currentRound = 0;
+			this.playerHealth = 100;
+			this.monsterHealth = 100;
 		}
 	}
 };
